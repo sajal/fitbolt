@@ -40,10 +40,7 @@ func NewBoltDB(dbpath string) (*BoltDB, error) {
 func (db *BoltDB) GetDayDetail(ts time.Time) (ds *DayDetail, err error) {
 	err = db.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("DayDetail"))
-		t, err := ts.GobEncode()
-		if err != nil {
-			return fmt.Errorf("encode gob ts: %s", err)
-		}
+		t := []byte(ts.Format("2006-01-02"))
 		v := b.Get(t)
 		//log.Println(v)
 		if v == nil {
@@ -68,10 +65,7 @@ func (db *BoltDB) StoreDayDetail(ts time.Time, ds *DayDetail) error {
 		if err != nil {
 			return fmt.Errorf("encode gob DayDetail: %s", err)
 		}
-		t, err := ts.GobEncode()
-		if err != nil {
-			return fmt.Errorf("encode gob ts: %s", err)
-		}
+		t := []byte(ts.Format("2006-01-02"))
 		bucket.Put(t, network.Bytes())
 		return nil
 	})

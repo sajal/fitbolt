@@ -5,11 +5,31 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"time"
 
 	cli "gopkg.in/urfave/cli.v1"
 
 	"github.com/sajal/fitbolt"
 )
+
+func steps(dbpath string) error {
+	if dbpath == "" {
+		return fmt.Errorf("dbpath is blank")
+	}
+	db, err := fitbolt.NewBoltDB(dbpath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	ts := time.Now().Truncate(time.Hour * 24)
+	//log.Println(ts)
+	ds, err := db.GetDayDetail(ts)
+	if err != nil {
+		return err
+	}
+	fmt.Println(ds.DaySteps())
+	return nil
+}
 
 func sync(dbpath, fname, fclient, fsecret, genesis string) error {
 	if dbpath == "" {
@@ -85,7 +105,7 @@ func main() {
 			Name:  "steps",
 			Usage: "list steps by day",
 			Action: func(c *cli.Context) error {
-				return fmt.Errorf("not implimented yet")
+				return steps(c.GlobalString("dbpath"))
 			},
 		},
 	}
